@@ -8,6 +8,7 @@ import {
   SignInSchema,
   CreateRoomSchema,
 } from "@repo/common/types";
+import { prismaClient } from "@repo/database/client";
 
 const app = express();
 
@@ -20,7 +21,14 @@ app.post("/signup", (req: Request, res: Response) => {
   if (!data.success) {
     return res.status(400).json({ message: data.error.message });
   }
-
+  const user = prismaClient.user.create({
+    data: {
+      email: data.data.email,
+      username: data.data.username,
+      password: data.data.password,
+      name: data.data.name,
+    },
+  });
   res.json({ message: "User signed up" });
 });
 

@@ -11,6 +11,7 @@ node_modules
 /apps/*/node_modules
 /apps/*/dist
 
+/packages/database/prisma/generated
 
 # Local env files
 .env
