@@ -91,7 +91,24 @@ app.post("/createroom", middleware, async (req: Request, res: Response) => {
     return res.status(400).json({ message: data.error.message });
   }
 
-  res.json({ message: "Room created", roomId: 123 });
+  const userId = req.userId;
+  if (!userId) {
+    return res.status(401).json({ message: "userid in req not found!" });
+  }
+
+  const room = await prismaClient.room.create({
+    data: {
+      slug: data.data.name,
+      name: data.data.name,
+      adminId: userId,
+    },
+  });
+
+  if (!room) {
+    return res.status(500).json({ message: "Failed to create room" });
+  }
+
+  res.json({ message: "Room created", name: room.name, id: room.id });
 });
 
 app.listen(8000, () => {
