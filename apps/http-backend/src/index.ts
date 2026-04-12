@@ -8,7 +8,7 @@ import {
   SignInSchema,
   CreateRoomSchema,
 } from "@repo/common/types";
-import { prismaClient } from "@repo/database/client";
+import { prismaClient, Prisma } from "@repo/database/client";
 
 const app = express();
 app.use(express.json());
@@ -22,6 +22,7 @@ app.post("/signup", async (req: Request, res: Response) => {
   if (!data.success) {
     return res.status(400).json({ message: data.error.message });
   }
+
   try {
     const user = await prismaClient.user.create({
       data: {
@@ -31,9 +32,23 @@ app.post("/signup", async (req: Request, res: Response) => {
         name: data.data.name,
       },
     });
-    res.json({ message: "User signed up" });
-  } catch (error) {
-    res.status(500).json({ message: "User already exists", error });
+
+    return res.status(201).json({ message: "User signed up successfully" });
+  } catch (error: any) {
+    // Prisma unique constraint violation → P2002
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      const conflictingField = (error.meta?.target as string[])?.[0] ?? "field";
+      return res.status(409).json({
+        message: `An account already exists`,
+      });
+    }
+
+    // Everything else is a genuine server error
+    console.error("[POST /signup]", error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 });
 

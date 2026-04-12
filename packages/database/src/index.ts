@@ -1,6 +1,6 @@
 import path from "node:path";
 import dotenv from "dotenv";
-import { PrismaClient } from "./generated/prisma";
+import { PrismaClient, Prisma } from "./generated/prisma";
 import { PrismaPg } from "@prisma/adapter-pg";
 
 // Load the package-local env file so workspace apps do not need to set DATABASE_URL
@@ -18,3 +18,5 @@ if (!databaseUrl) {
 export const prismaClient = new PrismaClient({
   adapter: new PrismaPg(databaseUrl),
 });
+
+export { Prisma };
