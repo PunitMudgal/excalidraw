@@ -1,6 +1,8 @@
 import express from "express";
 import type { Request, Response } from "express";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
+
 import { JWT_SECRET } from "@repo/backend-common/config";
 import { middleware } from "./middleware";
 import {
@@ -24,11 +26,14 @@ app.post("/signup", async (req: Request, res: Response) => {
   }
 
   try {
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(data.data.password, saltRounds);
+
     const user = await prismaClient.user.create({
       data: {
         email: data.data.email,
         username: data.data.username,
-        password: data.data.password,
+        password: hashedPassword,
         name: data.data.name,
       },
     });
@@ -42,7 +47,7 @@ app.post("/signup", async (req: Request, res: Response) => {
     ) {
       const conflictingField = (error.meta?.target as string[])?.[0] ?? "field";
       return res.status(409).json({
-        message: `An account already exists`,
+        message: `An account already exists for this ${conflictingField}`,
       });
     }
 
@@ -52,16 +57,35 @@ app.post("/signup", async (req: Request, res: Response) => {
   }
 });
 
-app.post("/signin", (req: Request, res: Response) => {
+app.post("/signin", async (req: Request, res: Response) => {
   const data = SignInSchema.safeParse(req.body);
   if (!data.success) {
     return res.status(400).json({ message: data.error.message });
   }
 
-  res.json({ message: "User signed in" });
+  const { email, password } = data.data;
+  const user = await prismaClient.user.findUnique({ where: { email } });
+  if (!user) {
+    return res.status(401).json({ message: "Invalid email or password" });
+  }
+
+  const isMatch = await bcrypt.compare(password, user.password);
+
+  if (!isMatch) {
+    return res.status(401).json({
+      message: "Invalid credentials",
+    });
+  }
+
+  const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: "1h" });
+  if (!token) {
+    return res.status(500).json({ message: "Failed to generate token" });
+  }
+
+  res.json({ message: "User signed in", token });
 });
 
-app.post("/createroom", middleware, (req: Request, res: Response) => {
+app.post("/createroom", middleware, async (req: Request, res: Response) => {
   const data = CreateRoomSchema.safeParse(req.body);
   if (!data.success) {
     return res.status(400).json({ message: data.error.message });
