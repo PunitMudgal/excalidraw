@@ -110,6 +110,9 @@ importers:
         specifier: ^8.20.0
         version: 8.20.0
     devDependencies:
+      '@repo/database':
+        specifier: workspace:*
+        version: link:../../packages/database
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config

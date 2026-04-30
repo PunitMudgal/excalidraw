@@ -8,7 +8,7 @@ export function middleware(req: Request, res: Response, next: NextFunction) {
     return res.status(401).json({ message: "Unauthorized" });
   }
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, JWT_SECRET) as jwt.JwtPayload;
     req.userId = decoded.userId;
     next();
   } catch (error) {

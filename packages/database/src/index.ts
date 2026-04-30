@@ -1,11 +1,21 @@
 import path from "node:path";
+import fs from "node:fs";
 import dotenv from "dotenv";
-import { PrismaClient, Prisma } from "./generated/prisma";
+import { PrismaClient, Prisma } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 
 // Load the package-local env file so workspace apps do not need to set DATABASE_URL
 // themselves before importing the shared database client.
-dotenv.config({ path: path.resolve(__dirname, "../.env") });
+const envPathCandidates = [
+  path.resolve(process.cwd(), "packages/database/.env"),
+  path.resolve(process.cwd(), "../../packages/database/.env"),
+];
+
+const resolvedEnvPath =
+  envPathCandidates.find((candidate) => fs.existsSync(candidate)) ??
+  envPathCandidates[0];
+
+dotenv.config({ path: resolvedEnvPath });
 
 const databaseUrl = process.env.DATABASE_URL;
 

@@ -111,6 +111,34 @@ app.post("/createroom", middleware, async (req: Request, res: Response) => {
   res.json({ message: "Room created", name: room.name, id: room.id });
 });
 
+app.get("/chats/:roomId", middleware, async (req: Request, res: Response) => {
+  const roomId = Number(req.params.roomId);
+
+  const chats = await prismaClient.chat.findMany({
+    where: { roomId },
+    take: 100,
+    orderBy: { createdAt: "asc" },
+  });
+
+  res.json({ chats });
+});
+
+app.get("/room/:slug", async (req: Request, res: Response) => {
+  const slug = req.params.slug;
+  if (typeof slug !== "string") {
+    return res.status(400).json({ message: "Invalid room slug" });
+  }
+  const room = await prismaClient.room.findFirst({
+    where: {
+      slug,
+    },
+  });
+
+  res.json({
+    room,
+  });
+});
+
 app.listen(8000, () => {
   console.log("Server is running on port 8000");
 });
