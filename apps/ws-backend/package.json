@@ -14,13 +14,13 @@
   "type": "commonjs",
   "dependencies": {
     "@repo/backend-common": "workspace:*",
-    "@types/jsonwebtoken": "^9.0.10",
-    "@types/ws": "^8.18.1",
+    "@repo/database": "workspace:*",
     "jsonwebtoken": "^9.0.3",
     "ws": "^8.20.0"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
-    "@repo/database": "workspace:*"
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/ws": "^8.18.1"
   }
 }

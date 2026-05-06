@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 // todo 1. install tailwindcsss
 
-const page = () => {
+const Page = () => {
   const [roomId, setRoomId] = useState<string | null>(null);
   const router = useRouter();
 
@@ -25,4 +25,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;

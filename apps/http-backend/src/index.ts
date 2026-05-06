@@ -98,8 +98,8 @@ app.post("/createroom", middleware, async (req: Request, res: Response) => {
 
   const room = await prismaClient.room.create({
     data: {
-      slug: data.data.name,
       name: data.data.name,
+      slug: data.data.name.replace(/\s+/g, "-").toLowerCase(),
       adminId: userId,
     },
   });
@@ -111,7 +111,7 @@ app.post("/createroom", middleware, async (req: Request, res: Response) => {
   res.json({ message: "Room created", name: room.name, id: room.id });
 });
 
-app.get("/chats/:roomId", middleware, async (req: Request, res: Response) => {
+app.get("/chats/:roomId", async (req: Request, res: Response) => {
   const roomId = Number(req.params.roomId);
 
   const chats = await prismaClient.chat.findMany({
